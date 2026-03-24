@@ -75,7 +75,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="input-field pr-12"
-                  placeholder="email@smartuniversity.edu"
+                  placeholder="email@campusmind.edu"
                   required
                 />
               </div>
@@ -117,9 +117,9 @@ export default function LoginPage() {
             <p className="text-dark-400 text-sm text-center mb-3">بيانات الدخول التجريبية</p>
             <div className="grid grid-cols-3 gap-2 text-xs">
               {[
-                { role: 'مدير', email: 'admin@smartuniversity.edu', pass: 'Admin@123' },
-                { role: 'دكتور', email: 'doctor@smartuniversity.edu', pass: 'Doctor@123' },
-                { role: 'طالب', email: 'student1@smartuniversity.edu', pass: 'Student@123' },
+                { role: 'مدير', email: 'admin@campusmind.edu', pass: 'Admin@123' },
+                { role: 'دكتور', email: 'dr.ahmed@campusmind.edu', pass: 'Doctor@123' },
+                { role: 'طالب', email: 'mohamed.ahmed@campusmind.edu', pass: 'Student@123' },
               ].map((demo) => (
                 <button
                   key={demo.role}
