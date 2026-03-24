@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 
@@ -45,11 +46,15 @@ export default function LoginPage() {
       </div>
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-dark font-black text-2xl">SU</span>
-          </div>
-          <h1 className="text-3xl font-black mb-2">تسجيل الدخول</h1>
-          <p className="text-dark-400">أدخل بياناتك للوصول إلى حسابك</p>
+          <Image 
+            src="/logo.png" 
+            alt="CampusMind Logo" 
+            width={80} 
+            height={80}
+            className="object-contain mx-auto mb-4"
+          />
+          <h1 className="text-3xl font-black mb-2">CampusMind</h1>
+          <p className="text-dark-400">نظام الإرشاد الأكاديمي الذكي</p>
         </div>
 
         <div className="card">

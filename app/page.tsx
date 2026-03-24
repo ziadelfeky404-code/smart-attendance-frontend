@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Users, BookOpen, QrCode, BarChart3, GraduationCap,
@@ -24,10 +25,14 @@ export default function HomePage() {
         <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         <nav className="relative z-10 flex items-center justify-between px-6 lg:px-12 h-20">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-dark font-bold">SU</span>
-            </div>
-            <span className="font-bold text-xl">Smart University</span>
+            <Image 
+              src="/logo.png" 
+              alt="CampusMind Logo" 
+              width={50} 
+              height={50}
+              className="object-contain"
+            />
+            <span className="font-bold text-xl">CampusMind</span>
           </div>
           {user ? (
             <Link
@@ -47,15 +52,15 @@ export default function HomePage() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <ScanLine size={16} />
-              نظام حضور ذكي ومتطور
+              نظام إرشاد أكاديمي ذكي
             </div>
             <h1 className="text-4xl lg:text-6xl font-black mb-6 leading-tight">
-              سجّل حضورك
+              <span className="text-primary">CampusMind</span>
               <br />
-              <span className="text-primary">بسهولة وأمان</span>
+              نظام الإرشاد الأكاديمي
             </h1>
             <p className="text-dark-400 text-lg lg:text-xl max-w-2xl mx-auto mb-10">
-              نظام حضور ذكي يستخدم QR Code وOTP وGPS لضمان دقة عالية وسهولة في الاستخدام
+              نظام متكامل للإرشاد الأكاديمي والحضور الذكي
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {user ? (
@@ -117,7 +122,11 @@ export default function HomePage() {
       </section>
 
       <footer className="border-t border-dark-300 py-8 text-center text-dark-400 text-sm">
-        <p>© 2025 Smart University. جميع الحقوق محفوظة.</p>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Image src="/logo.png" alt="Logo" width={24} height={24} />
+          <span className="font-semibold">CampusMind</span>
+        </div>
+        <p>© 2025 CampusMind. جميع الحقوق محفوظة.</p>
       </footer>
     </div>
   );

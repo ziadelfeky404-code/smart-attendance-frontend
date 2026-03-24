@@ -3,9 +3,11 @@ import './globals.css';
 import { AuthProvider } from '@/hooks/useAuth';
 
 export const metadata: Metadata = {
-  title: 'Smart University - نظام الحضور الذكي',
-  description: 'نظام الحضور الذكي للجامعة',
-  icons: { icon: '/favicon.ico' },
+  title: 'CampusMind - نظام الإرشاد الأكاديمي',
+  description: 'نظام الإرشاد الأكاديمي الذكي',
+  icons: { 
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

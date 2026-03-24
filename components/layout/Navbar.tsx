@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -68,10 +69,14 @@ export default function Navbar() {
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-dark font-bold text-sm">SU</span>
-              </div>
-              <span className="font-bold text-lg hidden sm:block">Smart University</span>
+              <Image 
+                src="/logo.png" 
+                alt="CampusMind" 
+                width={36} 
+                height={36}
+                className="object-contain"
+              />
+              <span className="font-bold text-lg hidden sm:block">CampusMind</span>
             </Link>
           </div>
           <div className="flex items-center gap-3">
