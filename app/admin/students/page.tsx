@@ -40,7 +40,14 @@ export default function StudentsPage() {
       if (editStudent) {
         await adminApi.students.update(editStudent.id, { full_name: form.full_name, phone: form.phone, year: Number(form.year) });
       } else {
-        await adminApi.students.create({ student_code: form.student_code, email: form.email, password: form.password, full_name: form.full_name, phone: form.phone, year: Number(form.year) });
+        await adminApi.students.create({ 
+          student_code: form.student_code || `STU${Date.now()}`, 
+          email: form.email, 
+          password: form.password, 
+          full_name: form.full_name, 
+          phone: form.phone, 
+          year: Number(form.year) 
+        });
       }
       setShowModal(false);
       setEditStudent(null);
