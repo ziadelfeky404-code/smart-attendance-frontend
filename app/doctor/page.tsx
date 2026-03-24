@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { adminApi, Section, Session } from '@/lib/api';
-import { QrCode, Lock, Eye, MapPin, Clock, Calendar, Plus } from 'lucide-react';
+import { QrCode, Lock, Eye, MapPin, Clock, Calendar, Plus, Navigation, Crosshair } from 'lucide-react';
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
@@ -13,7 +13,10 @@ export default function DoctorDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [openSection, setOpenSection] = useState('');
+  const [gpsMode, setGpsMode] = useState<'none' | 'current' | 'manual'>('none');
   const [gpsData, setGpsData] = useState({ lat: '', lon: '', radius: '100' });
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState('');
   const [qrSession, setQrSession] = useState<{ qr_token: string; expires_at: string } | null>(null);
   const [attendance, setAttendance] = useState<{ id: string; student_name?: string; student_code?: string; status: string; attended_at: string }[]>([]);
   const [showAttendance, setShowAttendance] = useState<string | null>(null);
@@ -35,13 +38,38 @@ export default function DoctorDashboard() {
     } catch { } finally { setLoading(false); }
   };
 
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('المتصفح لا يدعم تحديد الموقع');
+      return;
+    }
+    setLocationLoading(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setGpsData({
+          lat: position.coords.latitude.toFixed(6),
+          lon: position.coords.longitude.toFixed(6),
+          radius: gpsData.radius
+        });
+        setGpsMode('current');
+        setLocationLoading(false);
+      },
+      (error) => {
+        setLocationError('لم نتمكن من تحديد موقعك. تأكد من تفعيل الموقع.');
+        setLocationLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
   const openSession = async () => {
     if (!openSection) return;
     try {
       const res = await adminApi.lectures.openSession({
         section_id: openSection,
-        gps_latitude: gpsData.lat ? Number(gpsData.lat) : undefined,
-        gps_longitude: gpsData.lon ? Number(gpsData.lon) : undefined,
+        gps_latitude: gpsMode !== 'none' && gpsData.lat ? Number(gpsData.lat) : undefined,
+        gps_longitude: gpsMode !== 'none' && gpsData.lon ? Number(gpsData.lon) : undefined,
         gps_radius_meters: Number(gpsData.radius),
       });
         if (res.success) {
@@ -111,29 +139,99 @@ export default function DoctorDashboard() {
 
             <div className="card">
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Plus size={20} className="text-primary" /> فتح جلسة جديدة</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="label">اختر الشعبة</label>
-                  <select value={openSection} onChange={e => setOpenSection(e.target.value)} className="input-field">
-                    <option value="">اختر شعبة...</option>
-                    {sections.map(s => <option key={s.id} value={s.id}>{s.course_name} - {s.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">نصف القطر (متر)</label>
-                  <input type="number" value={gpsData.radius} onChange={e => setGpsData({ ...gpsData, radius: e.target.value })} className="input-field" placeholder="100" />
-                </div>
-                <div>
-                  <label className="label">خط العرض (اختياري)</label>
-                  <input type="text" value={gpsData.lat} onChange={e => setGpsData({ ...gpsData, lat: e.target.value })} className="input-field" placeholder="24.7136" />
-                </div>
-                <div>
-                  <label className="label">خط الطول (اختياري)</label>
-                  <input type="text" value={gpsData.lon} onChange={e => setGpsData({ ...gpsData, lon: e.target.value })} className="input-field" placeholder="46.6753" />
-                </div>
+              
+              <div className="mb-4">
+                <label className="label">اختر الشعبة</label>
+                <select value={openSection} onChange={e => setOpenSection(e.target.value)} className="input-field">
+                  <option value="">اختر شعبة...</option>
+                  {sections.map(s => <option key={s.id} value={s.id}>{s.course_name} - {s.name}</option>)}
+                </select>
               </div>
-              <button onClick={openSession} disabled={!openSection} className="btn-primary w-full md:w-auto">
-                <QrCode size={18} className="inline ml-2" /> فتح جلسة الحضور
+
+              <div className="mb-4 p-4 bg-dark-200 rounded-xl">
+                <label className="label mb-3">تحديد الموقع</label>
+                <div className="flex flex-wrap gap-3 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setGpsMode('none')}
+                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'none' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'}`}
+                  >
+                    <QrCode size={16} className="inline ml-2" />
+                    QR فقط
+                  </button>
+                  <button
+                    type="button"
+                    onClick={getCurrentLocation}
+                    disabled={locationLoading}
+                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'current' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'} flex items-center gap-2`}
+                  >
+                    {locationLoading ? (
+                      <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    ) : (
+                      <Navigation size={16} />
+                    )}
+                    موقعي الحالي
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGpsMode('manual')}
+                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'manual' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'}`}
+                  >
+                    <Crosshair size={16} className="inline ml-2" />
+                    إدخال يدوي
+                  </button>
+                </div>
+
+                {locationError && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm mb-3">
+                    {locationError}
+                  </div>
+                )}
+
+                {gpsMode !== 'none' && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="label text-sm">خط العرض</label>
+                      <input 
+                        type="text" 
+                        value={gpsData.lat} 
+                        onChange={e => setGpsData({ ...gpsData, lat: e.target.value })} 
+                        className="input-field text-sm" 
+                        placeholder="24.7136" 
+                      />
+                    </div>
+                    <div>
+                      <label className="label text-sm">خط الطول</label>
+                      <input 
+                        type="text" 
+                        value={gpsData.lon} 
+                        onChange={e => setGpsData({ ...gpsData, lon: e.target.value })} 
+                        className="input-field text-sm" 
+                        placeholder="46.6753" 
+                      />
+                    </div>
+                    <div>
+                      <label className="label text-sm">نصف القطر (م)</label>
+                      <input 
+                        type="number" 
+                        value={gpsData.radius} 
+                        onChange={e => setGpsData({ ...gpsData, radius: e.target.value })} 
+                        className="input-field text-sm" 
+                        placeholder="100" 
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-dark-400 text-xs mt-3">
+                  {gpsMode === 'none' && 'الطلاب سيسجلون الحضور بالـ QR فقط'}
+                  {gpsMode === 'current' && 'الطلاب يجب أن يكونوا في نطاق 100 متر من موقعك'}
+                  {gpsMode === 'manual' && 'أدخل إحداثيات الموقع يدوياً'}
+                </p>
+              </div>
+
+              <button onClick={openSession} disabled={!openSection} className="btn-primary w-full md:w-auto text-lg py-3">
+                <QrCode size={20} className="inline ml-2" /> فتح جلسة الحضور
               </button>
             </div>
           </>
