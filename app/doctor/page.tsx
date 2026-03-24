@@ -1,10 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
 import { useAuth } from '@/hooks/useAuth';
 import { adminApi, Section, Session } from '@/lib/api';
-import { QrCode, Lock, Eye, MapPin, Clock, Calendar, Plus, Navigation, Crosshair } from 'lucide-react';
+import { QrCode, Lock, Eye, MapPin, Clock, Plus, X } from 'lucide-react';
+
+const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false });
 
 export default function DoctorDashboard() {
   const { user } = useAuth();
@@ -13,13 +16,12 @@ export default function DoctorDashboard() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [openSection, setOpenSection] = useState('');
-  const [gpsMode, setGpsMode] = useState<'none' | 'current' | 'manual'>('none');
-  const [gpsData, setGpsData] = useState({ lat: '', lon: '', radius: '100' });
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [locationError, setLocationError] = useState('');
+  const [gpsEnabled, setGpsEnabled] = useState(false);
+  const [gpsData, setGpsData] = useState({ lat: 0, lon: 0, radius: 100 });
   const [qrSession, setQrSession] = useState<{ qr_token: string; expires_at: string } | null>(null);
   const [attendance, setAttendance] = useState<{ id: string; student_name?: string; student_code?: string; status: string; attended_at: string }[]>([]);
   const [showAttendance, setShowAttendance] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     if (user?.role !== 'DOCTOR') { router.push('/'); return; }
@@ -38,29 +40,12 @@ export default function DoctorDashboard() {
     } catch { } finally { setLoading(false); }
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('المتصفح لا يدعم تحديد الموقع');
-      return;
-    }
-    setLocationLoading(true);
-    setLocationError('');
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setGpsData({
-          lat: position.coords.latitude.toFixed(6),
-          lon: position.coords.longitude.toFixed(6),
-          radius: gpsData.radius
-        });
-        setGpsMode('current');
-        setLocationLoading(false);
-      },
-      (error) => {
-        setLocationError('لم نتمكن من تحديد موقعك. تأكد من تفعيل الموقع.');
-        setLocationLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+  const handleLocationChange = (lat: number, lon: number) => {
+    setGpsData({ ...gpsData, lat, lon });
+  };
+
+  const handleRadiusChange = (radius: number) => {
+    setGpsData({ ...gpsData, radius });
   };
 
   const openSession = async () => {
@@ -68,13 +53,14 @@ export default function DoctorDashboard() {
     try {
       const res = await adminApi.lectures.openSession({
         section_id: openSection,
-        gps_latitude: gpsMode !== 'none' && gpsData.lat ? Number(gpsData.lat) : undefined,
-        gps_longitude: gpsMode !== 'none' && gpsData.lon ? Number(gpsData.lon) : undefined,
-        gps_radius_meters: Number(gpsData.radius),
+        gps_latitude: gpsEnabled && gpsData.lat ? gpsData.lat : undefined,
+        gps_longitude: gpsEnabled && gpsData.lon ? gpsData.lon : undefined,
+        gps_radius_meters: gpsEnabled ? gpsData.radius : undefined,
       });
-        if (res.success) {
+      if (res.success) {
         loadData();
         if (res.data) setQrSession({ qr_token: (res.data as unknown as { qr_token?: string }).qr_token || '', expires_at: '' });
+        setShowMap(false);
       }
     } catch (err: unknown) { alert((err as Error).message); }
   };
@@ -147,6 +133,97 @@ export default function DoctorDashboard() {
                   {sections.map(s => <option key={s.id} value={s.id}>{s.course_name} - {s.name}</option>)}
                 </select>
               </div>
+
+              <div className="mb-4 p-4 bg-dark-200 rounded-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="label mb-0">تحديد منطقة الحضور</label>
+                  <button
+                    type="button"
+                    onClick={() => setGpsEnabled(!gpsEnabled)}
+                    className={`px-4 py-2 rounded-lg transition-colors ${gpsEnabled ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'}`}
+                  >
+                    <MapPin size={16} className="inline ml-2" />
+                    {gpsEnabled ? 'مفعل' : 'تفعيل الموقع'}
+                  </button>
+                </div>
+
+                {gpsEnabled && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-dark-400">
+                        {gpsData.lat && gpsData.lon 
+                          ? `الموقع: ${gpsData.lat.toFixed(6)}, ${gpsData.lon.toFixed(6)}`
+                          : 'اضغط على الخريطة لتحديد الموقع'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMap(true)}
+                        className="text-primary text-sm hover:underline"
+                      >
+                        {gpsData.lat ? 'تعديل الموقع' : 'فتح الخريطة'}
+                      </button>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <label className="label text-sm">نصف القطر: {gpsData.radius} متر</label>
+                      <input
+                        type="range"
+                        min="50"
+                        max="500"
+                        value={gpsData.radius}
+                        onChange={(e) => handleRadiusChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-dark-400 mt-1">
+                        <span>50 م</span>
+                        <span className="text-primary">{gpsData.radius} م</span>
+                        <span>500 م</span>
+                      </div>
+                    </div>
+
+                    <p className="text-dark-400 text-xs mt-3 bg-dark-300 p-2 rounded">
+                      الطلاب يجب أن يكونوا في نطاق {gpsData.radius} متر من الموقع المحدد على الخريطة لتسجيل الحضور
+                    </p>
+                  </div>
+                )}
+
+                {!gpsEnabled && (
+                  <p className="text-dark-400 text-sm">
+                    الطلاب سيسجلون الحضور بالـ QR Code فقط بدون التحقق من الموقع
+                  </p>
+                )}
+              </div>
+
+              <button onClick={openSession} disabled={!openSection || (gpsEnabled && (!gpsData.lat || !gpsData.lon))} className="btn-primary w-full md:w-auto text-lg py-3">
+                <QrCode size={20} className="inline ml-2" /> فتح جلسة الحضور
+              </button>
+            </div>
+
+      {showMap && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="card w-full max-w-3xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">تحديد موقع الحضور</h2>
+              <button onClick={() => setShowMap(false)} className="p-2 hover:bg-dark-200 rounded-lg">
+                <X size={24} />
+              </button>
+            </div>
+            <p className="text-dark-400 text-sm mb-4">
+              اضغط على الخريطة لتحديد موقع الحضور. الدائرة الزرقاء تحدد نطاق {gpsData.radius} متر
+            </p>
+            <LocationPicker
+              lat={gpsData.lat}
+              lon={gpsData.lon}
+              radius={gpsData.radius}
+              onLocationChange={handleLocationChange}
+              onRadiusChange={handleRadiusChange}
+            />
+            <button onClick={() => setShowMap(false)} className="btn-primary w-full mt-4">
+              تأكيد الموقع
+            </button>
+          </div>
+        </div>
+      )}
 
               <div className="mb-4 p-4 bg-dark-200 rounded-xl">
                 <label className="label mb-3">تحديد الموقع</label>
