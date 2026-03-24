@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
   LayoutDashboard, Users, BookOpen, Calendar, GraduationCap, ScrollText,
-  LogOut, Menu, X, QrCode, Bell, Settings, ChevronDown, ClipboardList
+  LogOut, Menu, X, QrCode, Bell, Settings, ChevronDown, ClipboardList,
+  Bot, AlertTriangle, MessageSquare, FileText, GraduationCap as AdvisorIcon
 } from 'lucide-react';
 
 const navItems = {
@@ -19,19 +20,26 @@ const navItems = {
     { href: '/admin/section-assignment', label: 'تعيين الطلاب', icon: Users },
     { href: '/admin/lectures', label: 'المحاضرات', icon: ClipboardList },
     { href: '/admin/attendance', label: 'الحضور', icon: QrCode },
+    { href: '/admin/risk', label: 'متابعة المخاطر', icon: AlertTriangle },
     { href: '/admin/reports', label: 'التقارير', icon: ScrollText },
+    { href: '/admin/regulations', label: 'الوائح', icon: FileText },
+    { href: '/ai', label: 'المساعد الذكي', icon: Bot },
   ],
   DOCTOR: [
     { href: '/doctor', label: 'لوحة التحكم', icon: LayoutDashboard },
     { href: '/doctor/sections', label: 'شعبتي', icon: Calendar },
     { href: '/doctor/sessions', label: 'الجلسات', icon: QrCode },
     { href: '/doctor/attendance', label: 'الحضور', icon: ClipboardList },
+    { href: '/doctor/advising', label: 'الإرشاد الأكاديمي', icon: AdvisorIcon },
     { href: '/doctor/reports', label: 'التقارير', icon: ScrollText },
+    { href: '/ai', label: 'المساعد الذكي', icon: Bot },
   ],
   STUDENT: [
     { href: '/student', label: 'لوحة التحكم', icon: LayoutDashboard },
     { href: '/student/attendance', label: 'تسجيل الحضور', icon: QrCode },
     { href: '/student/history', label: 'سجل الحضور', icon: ScrollText },
+    { href: '/student/advising', label: 'الإرشاد الأكاديمي', icon: AdvisorIcon },
+    { href: '/ai', label: 'المساعد الذكي', icon: Bot },
   ],
 };
 
