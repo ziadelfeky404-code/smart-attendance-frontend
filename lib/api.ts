@@ -94,6 +94,65 @@ export const studentApi = {
   record: (data: { sessionId: string; qrToken: string; otpCode: string; gpsLatitude: number; gpsLongitude: number }) => api.post<ApiResponse<AttendanceResult>>('/attendance/student/record', data),
 };
 
+export const riskApi = {
+  getAtRiskStudents: (params?: Record<string, string>) => api.get<ApiResponse<{ students: AtRiskStudent[]; total: number }>>(`/risk/students?${new URLSearchParams(params || {})}`),
+  analyzeStudent: (studentId: string, courseId?: string) => api.get<ApiResponse<{ riskLogs: RiskLog[] }>>(`/risk/analyze?studentId=${studentId}${courseId ? `&courseId=${courseId}` : ''}`),
+  getStudentRiskHistory: (studentId: string) => api.get<ApiResponse<{ history: RiskLog[] }>>(`/risk/students/${studentId}`),
+  getMyRiskStatus: () => api.get<ApiResponse<RiskStatus>>('/risk/my-status'),
+  getRiskStats: () => api.get<ApiResponse<RiskStats>>('/risk/stats'),
+};
+
+export const notificationApi = {
+  getAll: (params?: Record<string, string>) => api.get<ApiResponse<{ notifications: Notification[]; total: number; unreadCount: number }>>(`/notifications?${new URLSearchParams(params || {})}`),
+  markAsRead: (id: string) => api.post<ApiResponse<Notification>>(`/notifications/${id}/read`, {}),
+  markAllAsRead: () => api.post<ApiResponse<{ count: number }>>('/notifications/mark-all-read', {}),
+  markAsUnread: (id: string) => api.post<ApiResponse<Notification>>(`/notifications/${id}/unread`, {}),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/notifications/${id}`),
+  deleteAllRead: () => api.delete<ApiResponse<{ count: number }>>('/notifications/read/all'),
+  getUnreadCount: () => api.get<ApiResponse<{ count: number }>>('/notifications/unread-count'),
+};
+
+export const advisingApi = {
+  getAdvisors: (params?: Record<string, string>) => api.get<ApiResponse<{ advisors: Advisor[]; total: number }>>(`/advising/advisors?${new URLSearchParams(params || {})}`),
+  createAdvisor: (data: { doctorId: string; specialization?: string; maxStudents?: number }) => api.post<ApiResponse<Advisor>>('/advising/advisors', data),
+  getAssignedStudents: (params?: Record<string, string>) => api.get<ApiResponse<{ students: AssignedStudent[]; total: number }>>(`/advising/students/assigned?${new URLSearchParams(params || {})}`),
+  getMyAdvisor: () => api.get<ApiResponse<{ advisor: Advisor; assignedAt: string } | null>>('/advising/students/my-advisor'),
+  assignStudent: (data: { studentId: string; advisorId: string; reason?: string }) => api.post<ApiResponse<null>>('/advising/students/assign', data),
+  unassignStudent: (studentId: string) => api.post<ApiResponse<null>>('/advising/students/unassign', { studentId }),
+  getSessions: (params?: Record<string, string>) => api.get<ApiResponse<{ sessions: AdvisingSession[]; total: number }>>(`/advising/sessions?${new URLSearchParams(params || {})}`),
+  getMySessions: (params?: Record<string, string>) => api.get<ApiResponse<{ sessions: AdvisingSession[]; total: number }>>(`/advising/sessions/my?${new URLSearchParams(params || {})}`),
+  getUpcomingSessions: () => api.get<ApiResponse<{ sessions: AdvisingSession[] }>>('/advising/sessions/upcoming'),
+  getSessionById: (id: string) => api.get<ApiResponse<AdvisingSession>>(`/advising/sessions/${id}`),
+  createSession: (data: { studentId: string; advisorId: string; caseId?: string; scheduledAt: string; durationMinutes?: number; sessionType?: string; location?: string; meetingLink?: string }) => api.post<ApiResponse<AdvisingSession>>('/advising/sessions', data),
+  updateSession: (id: string, data: { status?: string; summary?: string; recommendations?: string; followUpRequired?: boolean; followUpDate?: string }) => api.put<ApiResponse<AdvisingSession>>(`/advising/sessions/${id}`, data),
+  getSessionNotes: (sessionId: string) => api.get<ApiResponse<{ notes: SessionNote[] }>>(`/advising/sessions/${sessionId}/notes`),
+  addNote: (data: { sessionId: string; noteType?: string; content: string; isPrivate?: boolean }) => api.post<ApiResponse<SessionNote>>('/advising/sessions/notes', data),
+};
+
+export const caseApi = {
+  getAll: (params?: Record<string, string>) => api.get<ApiResponse<{ cases: Case[]; total: number }>>(`/cases?${new URLSearchParams(params || {})}`),
+  getStats: () => api.get<ApiResponse<CaseStats>>('/cases/stats'),
+  getById: (id: string) => api.get<ApiResponse<Case>>(`/cases/${id}`),
+  create: (data: { studentId: string; courseId?: string; assignedAdvisorId?: string; title: string; description?: string; caseType?: string; priority?: string; riskLevel?: string }) => api.post<ApiResponse<Case>>('/cases', data),
+  update: (id: string, data: { title?: string; description?: string; assignedAdvisorId?: string; priority?: string; status?: string; resolutionNotes?: string }) => api.put<ApiResponse<Case>>(`/cases/${id}`, data),
+  delete: (id: string) => api.delete<ApiResponse<null>>(`/cases/${id}`),
+  linkSession: (id: string, sessionId: string) => api.post<ApiResponse<null>>(`/cases/${id}/link-session`, { sessionId }),
+  getMyCases: () => api.get<ApiResponse<{ cases: Case[]; total: number }>>('/cases/my'),
+  getAdvisorCases: (params?: Record<string, string>) => api.get<ApiResponse<{ cases: Case[]; total: number }>>(`/cases/advisor?${new URLSearchParams(params || {})}`),
+};
+
+export const studyPlanApi = {
+  getPlans: (params?: Record<string, string>) => api.get<ApiResponse<{ plans: StudyPlan[]; total: number }>>(`/study-plans?${new URLSearchParams(params || {})}`),
+  getPlanById: (id: string) => api.get<ApiResponse<StudyPlan>>(`/study-plans/${id}`),
+  createPlan: (data: { studentId: string; sessionId?: string; title: string; description?: string; goals?: string; startDate: string; endDate?: string }) => api.post<ApiResponse<StudyPlan>>('/study-plans', data),
+  updatePlan: (id: string, data: { title?: string; description?: string; goals?: string; endDate?: string; status?: string }) => api.put<ApiResponse<StudyPlan>>(`/study-plans/${id}`, data),
+  deletePlan: (id: string) => api.delete<ApiResponse<null>>(`/study-plans/${id}`),
+  getMyPlans: () => api.get<ApiResponse<{ plans: StudyPlan[]; total: number }>>('/study-plans/my'),
+  createTask: (data: { planId: string; title: string; description?: string; courseId?: string; taskType?: string; priority?: string; deadline?: string; orderIndex?: number }) => api.post<ApiResponse<StudyPlanTask>>('/study-plans/tasks', data),
+  updateTask: (id: string, data: { title?: string; description?: string; priority?: string; status?: string; progress?: number; deadline?: string }) => api.put<ApiResponse<StudyPlanTask>>(`/study-plans/tasks/${id}`, data),
+  deleteTask: (id: string) => api.delete<ApiResponse<null>>(`/study-plans/tasks/${id}`),
+};
+
 export interface User {
   id: string; email: string; fullName: string; role: 'ADMIN' | 'DOCTOR' | 'TA' | 'STUDENT';
 }
@@ -117,3 +176,180 @@ export interface StudentSummary { totalSessions: number; present: number; absent
 export interface SessionPreview { sessionId: string; sectionId: string; sectionName: string; courseName: string; doctorName: string; openedAt: string; expiresAt: string; requiresGps: boolean; gpsRadius?: number; qrToken: string; }
 export interface AttendanceResult { id: string; status: string; otpVerified: boolean; gpsVerified: boolean; distanceMeters: number; attendedAt: string; sessionInfo: { sectionName: string; courseName: string; doctorName: string; }; }
 export interface SectionStudent { studentId: string; studentCode: string; fullName: string; enrolledAt: string; }
+
+export interface AtRiskStudent {
+  student_id: string;
+  student_name: string;
+  student_code: string;
+  student_email: string;
+  risk_level: string;
+  attendance_rate: number;
+  absence_streak: number;
+  recommendation: string;
+  last_updated: string;
+  course_name: string;
+  course_id: string;
+}
+
+export interface RiskLog {
+  id: string;
+  student_id: string;
+  course_id: string;
+  risk_level: string;
+  attendance_rate: number;
+  absence_streak: number;
+  recommendation: string;
+  created_at: string;
+}
+
+export interface RiskStatus {
+  overallStatus: string;
+  averageAttendance: number;
+  courses: { courseId: string; courseName: string; riskLevel: string; attendanceRate: number; absenceStreak: number; lastUpdated: string; recommendation: string; }[];
+  latestUpdate: string;
+}
+
+export interface RiskStats {
+  totalAtRisk: number;
+  critical: number;
+  warning: number;
+  good: number;
+  averageAttendance: number;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  user_type: string;
+  type: string;
+  title: string;
+  message: string;
+  related_id: string | null;
+  related_type: string | null;
+  is_read: string;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface Advisor {
+  id: string;
+  doctor_id: string;
+  doctor_name: string;
+  specialization: string;
+  max_students: number;
+  current_students: number;
+  is_active: boolean;
+}
+
+export interface AssignedStudent {
+  id: string;
+  full_name: string;
+  student_code: string;
+  email: string;
+  year: number;
+  assigned_at: string;
+  risk_level?: string;
+  attendance_rate?: number;
+}
+
+export interface AdvisingSession {
+  id: string;
+  student_id: string;
+  student_name: string;
+  student_code: string;
+  advisor_id: string;
+  advisor_name: string;
+  case_id: string | null;
+  scheduled_at: string;
+  duration_minutes: number;
+  status: string;
+  session_type: string;
+  location: string;
+  meeting_link: string;
+  completed_at: string | null;
+  summary: string | null;
+  recommendations: string | null;
+  follow_up_required: boolean;
+  follow_up_date: string | null;
+  created_at: string;
+}
+
+export interface SessionNote {
+  id: string;
+  session_id: string;
+  author_id: string;
+  author_name: string;
+  note_type: string;
+  content: string;
+  is_private: boolean;
+  created_at: string;
+}
+
+export interface Case {
+  id: string;
+  student_id: string;
+  student_name: string;
+  student_code: string;
+  course_id: string | null;
+  course_name: string | null;
+  assigned_advisor_id: string | null;
+  advisor_name: string | null;
+  title: string;
+  description: string | null;
+  case_type: string;
+  priority: string;
+  status: string;
+  risk_level: string | null;
+  initial_attendance: number | null;
+  current_attendance: number | null;
+  session_count: number;
+  resolved_at: string | null;
+  resolution_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CaseStats {
+  total: number;
+  open: number;
+  ongoing: number;
+  resolved: number;
+  byPriority: Record<string, number>;
+  byRiskLevel: Record<string, number>;
+}
+
+export interface StudyPlan {
+  id: string;
+  student_id: string;
+  student_name: string;
+  session_id: string | null;
+  title: string;
+  description: string | null;
+  goals: string | null;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  progress: number;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+  tasks?: StudyPlanTask[];
+}
+
+export interface StudyPlanTask {
+  id: string;
+  plan_id: string;
+  title: string;
+  description: string | null;
+  course_id: string | null;
+  course_name: string | null;
+  task_type: string;
+  priority: string;
+  status: string;
+  progress: number;
+  deadline: string | null;
+  completed_at: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}

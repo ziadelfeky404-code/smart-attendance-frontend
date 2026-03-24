@@ -198,10 +198,13 @@ export default function DoctorDashboard() {
                 <QrCode size={20} className="inline ml-2" /> فتح جلسة الحضور
               </button>
             </div>
+          </>
+        )}
+      </main>
 
       {showMap && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="card w-full max-w-3xl">
+          <div className="card w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">تحديد موقع الحضور</h2>
               <button onClick={() => setShowMap(false)} className="p-2 hover:bg-dark-200 rounded-lg">
@@ -224,96 +227,6 @@ export default function DoctorDashboard() {
           </div>
         </div>
       )}
-
-              <div className="mb-4 p-4 bg-dark-200 rounded-xl">
-                <label className="label mb-3">تحديد الموقع</label>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  <button
-                    type="button"
-                    onClick={() => setGpsMode('none')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'none' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'}`}
-                  >
-                    <QrCode size={16} className="inline ml-2" />
-                    QR فقط
-                  </button>
-                  <button
-                    type="button"
-                    onClick={getCurrentLocation}
-                    disabled={locationLoading}
-                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'current' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'} flex items-center gap-2`}
-                  >
-                    {locationLoading ? (
-                      <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    ) : (
-                      <Navigation size={16} />
-                    )}
-                    موقعي الحالي
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGpsMode('manual')}
-                    className={`px-4 py-2 rounded-lg transition-colors ${gpsMode === 'manual' ? 'bg-primary text-dark' : 'bg-dark-300 text-dark-400 hover:bg-dark-100'}`}
-                  >
-                    <Crosshair size={16} className="inline ml-2" />
-                    إدخال يدوي
-                  </button>
-                </div>
-
-                {locationError && (
-                  <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm mb-3">
-                    {locationError}
-                  </div>
-                )}
-
-                {gpsMode !== 'none' && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <label className="label text-sm">خط العرض</label>
-                      <input 
-                        type="text" 
-                        value={gpsData.lat} 
-                        onChange={e => setGpsData({ ...gpsData, lat: e.target.value })} 
-                        className="input-field text-sm" 
-                        placeholder="24.7136" 
-                      />
-                    </div>
-                    <div>
-                      <label className="label text-sm">خط الطول</label>
-                      <input 
-                        type="text" 
-                        value={gpsData.lon} 
-                        onChange={e => setGpsData({ ...gpsData, lon: e.target.value })} 
-                        className="input-field text-sm" 
-                        placeholder="46.6753" 
-                      />
-                    </div>
-                    <div>
-                      <label className="label text-sm">نصف القطر (م)</label>
-                      <input 
-                        type="number" 
-                        value={gpsData.radius} 
-                        onChange={e => setGpsData({ ...gpsData, radius: e.target.value })} 
-                        className="input-field text-sm" 
-                        placeholder="100" 
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-dark-400 text-xs mt-3">
-                  {gpsMode === 'none' && 'الطلاب سيسجلون الحضور بالـ QR فقط'}
-                  {gpsMode === 'current' && 'الطلاب يجب أن يكونوا في نطاق 100 متر من موقعك'}
-                  {gpsMode === 'manual' && 'أدخل إحداثيات الموقع يدوياً'}
-                </p>
-              </div>
-
-              <button onClick={openSession} disabled={!openSection} className="btn-primary w-full md:w-auto text-lg py-3">
-                <QrCode size={20} className="inline ml-2" /> فتح جلسة الحضور
-              </button>
-            </div>
-          </>
-        )}
-      </main>
 
       {qrSession && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={e => e.target === e.currentTarget && setQrSession(null)}>
