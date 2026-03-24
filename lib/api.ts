@@ -1,4 +1,4 @@
-const API_BASE = 'https://server-42f0zq9ab-ziadelfeky404-codes-projects.vercel.app/api';
+const API_BASE = 'https://server-pied-nu.vercel.app/api';
 
 interface ApiResponse<T> {
   success: boolean;
