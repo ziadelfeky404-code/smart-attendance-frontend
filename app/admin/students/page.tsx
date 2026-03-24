@@ -34,6 +34,10 @@ export default function StudentsPage() {
     } catch { } finally { setLoading(false); }
   };
 
+  const generateStudentCode = () => {
+    return String(Date.now()).slice(-8);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -41,7 +45,7 @@ export default function StudentsPage() {
         await adminApi.students.update(editStudent.id, { full_name: form.full_name, phone: form.phone, year: Number(form.year) });
       } else {
         await adminApi.students.create({ 
-          student_code: form.student_code || `STU${Date.now()}`, 
+          student_code: form.student_code || generateStudentCode(), 
           email: form.email, 
           password: form.password, 
           full_name: form.full_name, 
