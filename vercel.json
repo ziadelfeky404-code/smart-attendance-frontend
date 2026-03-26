@@ -1,7 +1,6 @@
 {
+  "name": "campusmind",
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/.next",
-  "framework": "nextjs",
-  "installCommand": "cd frontend && npm install",
-  "skipCache": true
+  "framework": "nextjs"
 }
