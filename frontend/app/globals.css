@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { @apply box-border; }
+  body {
+    @apply bg-dark text-white font-sans antialiased;
+  }
+  html { direction: rtl; }
+}
+
+@layer components {
+  .card {
+    @apply bg-dark-100 rounded-2xl border border-dark-300 p-6;
+  }
+  .btn-primary {
+    @apply bg-primary text-dark font-bold py-3 px-6 rounded-xl
+           hover:bg-primary/90 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply bg-dark-200 text-white font-medium py-3 px-6 rounded-xl
+           border border-dark-300 hover:bg-dark-300 transition-all duration-200;
+  }
+  .btn-danger {
+    @apply bg-danger/20 text-danger font-medium py-2 px-4 rounded-xl
+           hover:bg-danger/30 transition-all duration-200;
+  }
+  .input-field {
+    @apply w-full bg-dark-200 border border-dark-300 rounded-xl px-4 py-3
+           text-white placeholder-dark-400
+           focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30
+           transition-all duration-200;
+  }
+  .label {
+    @apply block text-sm font-medium text-dark-400 mb-2;
+  }
+  .stat-card {
+    @apply card flex items-center gap-4;
+  }
+  .table-wrapper {
+    @apply overflow-x-auto rounded-xl border border-dark-300;
+  }
+  .table {
+    @apply w-full text-sm;
+  }
+  .table th {
+    @apply bg-dark-200 text-dark-400 font-medium px-6 py-3 text-right;
+  }
+  .table td {
+    @apply px-6 py-4 border-t border-dark-300;
+  }
+  .table tbody tr {
+    @apply hover:bg-dark-200/50 transition-colors;
+  }
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+  .badge-success { @apply bg-success/20 text-success; }
+  .badge-warning { @apply bg-warning/20 text-warning; }
+  .badge-danger  { @apply bg-danger/20 text-danger; }
+  .badge-info    { @apply bg-accent/20 text-accent; }
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-dark-400
+           hover:bg-dark-200 hover:text-white transition-all duration-200;
+  }
+  .nav-link.active {
+    @apply bg-primary/10 text-primary;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-dark-100/80 backdrop-blur-xl border border-dark-300/50;
+  }
+}
