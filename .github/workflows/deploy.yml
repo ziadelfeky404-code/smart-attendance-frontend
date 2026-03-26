@@ -19,9 +19,10 @@ jobs:
           node-version: '18'
       - name: Install
         run: npm ci
+        working-directory: ./frontend
       - name: Build
         run: npm run build
-      # Deploy via Vercel (requires VERCEL_TOKEN and project/org IDs in secrets)
+        working-directory: ./frontend
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
@@ -29,4 +30,4 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          working-directory: .
+          working-directory: ./frontend
